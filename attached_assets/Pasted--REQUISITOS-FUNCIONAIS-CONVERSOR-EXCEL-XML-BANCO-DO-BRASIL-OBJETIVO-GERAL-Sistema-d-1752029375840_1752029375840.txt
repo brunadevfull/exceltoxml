@@ -1,0 +1,323 @@
+# 📋 REQUISITOS FUNCIONAIS - CONVERSOR EXCEL → XML (BANCO DO BRASIL)
+
+## 🎯 OBJETIVO GERAL
+Sistema desktop multiplataforma para converter planilhas Excel em arquivos XML no formato específico do sistema de comandos de pagamento do Banco do Brasil.
+
+## 🖥️ ESPECIFICAÇÕES TÉCNICAS
+
+### **Plataforma:**
+- **Desktop nativo** (Windows, Linux, macOS)
+- **NÃO web** - aplicação standalone
+- **NÃO usar navegador** - interface nativa
+- **Multiplataforma** - mesmo código para todos os OS
+
+### **Tecnologias Sugeridas:**
+- **Python** + Tkinter/PyQt/Kivy
+- **Java** + JavaFX/Swing
+- **C#** + .NET MAUI/Avalonia
+- **Dart** + Flutter Desktop
+- **Rust** + Tauri/egui
+- **Go** + Fyne/Walk
+
+## 📊 FUNCIONALIDADES PRINCIPAIS
+
+### **1. INTERFACE PRINCIPAL**
+
+#### **Layout:**
+- **Janela principal** 1400x900px (redimensionável, mínimo 1200x700)
+- **Área principal** (70%) + **Sidebar** (30%)
+- **Header** com título "Conversor Excel → XML - Sistema BB v2.0"
+
+#### **Componentes Obrigatórios:**
+- **Área de upload** com drag-and-drop para Excel (.xlsx/.xls)
+- **Campo texto:** Nome do arquivo XML de saída
+- **Campo texto:** Folha no formato MMAAAA (ex: 062025)
+- **Botão conversão** grande e destacado
+- **Barra de progresso** durante processamento
+- **Área de mensagens** (sucesso/erro/info)
+- **Sidebar** com gerenciamento de responsáveis
+
+### **2. GERENCIAMENTO DE RESPONSÁVEIS**
+
+#### **Funcionalidades:**
+- **Listar** responsáveis cadastrados
+- **Adicionar** novo responsável
+- **Editar** responsável existente
+- **Selecionar** responsável para conversão
+- **Alternar** entre modo simples (dropdown) e avançado (lista)
+
+#### **Campos do Responsável:**
+- **Nome completo** (obrigatório, até 100 chars)
+- **CPF** (obrigatório, 11 dígitos, apenas números)
+- **NIP** (obrigatório, até 20 chars)
+- **Perfil** (dropdown: AGI, ADM, GER)
+- **Tipo Perfil OM** (dropdown: IQM, SUP, ADM)
+- **Código Papem** (padrão: 094)
+
+#### **Validações:**
+- **CPF:** Algoritmo de validação completo
+- **Campos obrigatórios:** não podem estar vazios
+- **CPF único:** não permitir duplicatas
+- **Formato:** nome em maiúsculas, CPF apenas números
+
+#### **Persistência:**
+- **Arquivo JSON** local para armazenar responsáveis
+- **Backup automático** antes de salvar
+- **Responsável padrão** criado na primeira execução
+
+### **3. PROCESSAMENTO DE EXCEL**
+
+#### **Formato de Entrada:**
+```
+Colunas obrigatórias:
+- matricula: números (ex: 10024450)
+- rubrica: 7 dígitos (ex: 1208000)  
+- valor: decimal com ponto (ex: 12000.00)
+- tipo: NO (normal) ou DE (desconto)
+- trigrama: 3 letras (ex: BAA)
+```
+
+#### **Validações:**
+- **Extensões:** .xlsx, .xls
+- **Colunas:** verificar se todas obrigatórias existem
+- **Dados:** matricula/rubrica/valor não vazios
+- **Formato valor:** aceitar vírgula ou ponto, converter para ponto
+- **Tipo:** validar se é NO ou DE
+- **Contagem:** registros válidos vs inválidos
+
+#### **Processamento:**
+- **Leitura real** do arquivo Excel (não dados fixos)
+- **Limpeza:** trim em textos, formatação de números
+- **Validação linha por linha** com relatório de erros
+- **Contagem final** de registros processados
+
+### **4. GERAÇÃO DE XML**
+
+#### **Formato de Saída (CORRETO conforme arquivo resultado.txt):**
+```xml
+<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>
+<ArquivoComandosPagamento>
+  <sistema>3</sistema>
+  <dtGeracao>26/06/2025 11:22:34</dtGeracao>
+  <dtRemessa>26/06/2025 11:22:34</dtRemessa>
+  <nome>ROGERIO RIBEIRO DE SOUZA</nome>
+  <cpf>07328623705</cpf>
+  <perfil>AGI</perfil>
+  <tipoPerfilOM>IQM</tipoPerfilOM>
+  <nip>05955645</nip>
+  <codPapem>094</codPapem>
+  <qtdeTotal>131</qtdeTotal>
+  <folha>062025</folha>
+  <listaTrigrama>
+    <trigrama>
+      <trigrama>BAA</trigrama>
+      <listaComandosPagamento>
+        <ComandoPagamento>
+          <identificador>1</identificador>
+          <matricula>10024450</matricula>
+          <alterador>I</alterador>
+          <rubrica>1208000</rubrica>
+          <tpRubrica>NO</tpRubrica>
+          <formPagto>AV</formPagto>
+          <valComando>12000.00</valComando>
+        </ComandoPagamento>
+        <ComandoPagamento>
+          <identificador>2</identificador>
+          <matricula>10024450</matricula>
+          <alterador>I</alterador>
+          <rubrica>1210005</rubrica>
+          <tpRubrica>DE</tpRubrica>
+          <formPagto>AV</formPagto>
+          <valComando>12000.00</valComando>
+        </ComandoPagamento>
+        <!-- Continua para todos os 131 registros -->
+      </listaComandosPagamento>
+    </trigrama>
+  </listaTrigrama>
+</ArquivoComandosPagamento>
+```
+
+#### **Diferenças Importantes do Formato Real:**
+- **SEM** `xmlns:xsi` attribute no elemento raiz
+- **Estrutura simples:** tags diretas sem namespaces
+- **Encoding:** iso-8859-1 obrigatório
+- **Standalone:** yes
+- **Data/hora:** formato brasileiro DD/MM/AAAA HH:MM:SS
+- **Valores:** sempre com ponto decimal (ex: 12000.00)
+- **qtdeTotal:** número exato de registros processados (131 no exemplo)
+- **trigrama aninhado:** elemento `<trigrama>` dentro de `<trigrama>`
+
+#### **Regras de Negócio (CORRIGIDAS):**
+- **XML Declaration:** `<?xml version="1.0" encoding="iso-8859-1" standalone="yes"?>`
+- **Elemento raiz:** `<ArquivoComandosPagamento>` SEM atributos xmlns
+- **dtGeracao/dtRemessa:** mesmo valor, formato brasileiro DD/MM/AAAA HH:MM:SS
+- **sistema:** sempre "3"
+- **alterador:** sempre "I"  
+- **formPagto:** sempre "AV"
+- **identificador:** sequencial começando em 1
+- **trigrama:** estrutura aninhada - `<trigrama><trigrama>BAA</trigrama>...</trigrama>`
+- **encoding:** iso-8859-1 obrigatório
+- **valores:** sempre formato decimal com ponto (ex: 12000.00, 3066.09)
+- **qtdeTotal:** contar registros reais processados
+- **tpRubrica:** NO para créditos, DE para débitos
+- **Exemplo real:** O arquivo deve gerar exatamente como o resultado.txt (131 registros)
+
+### **5. FUNCIONALIDADES AUXILIARES**
+
+#### **Arquivo de Referência:**
+O sistema deve gerar XML **exatamente** como o arquivo `resultado.txt` fornecido, que contém:
+- **131 registros** processados
+- **Responsável:** ROGERIO RIBEIRO DE SOUZA
+- **Folha:** 062025 (junho/2025)
+- **Data geração:** 26/06/2025 11:22:34
+- **Trigrama:** BAA para todos os registros
+
+#### **Estrutura Validada:**
+- Diversos tipos de matrículas (8 dígitos)
+- Rubricas variadas (1208000, 1210005, 1216018, etc.)
+- Valores monetários diversos (17.34 até 89736.85)
+- Tipos NO (normal) e DE (desconto) intercalados
+- Identificadores sequenciais de 1 a 131
+
+#### **Padrões Observados:**
+- **Matrículas reais:** 10024450, 97115215, 98004450, 87275660, etc.
+- **Rubricas comuns:** 1208000 (mais frequente), 1210005, 1216018, 1237005, etc.
+- **Valores:** sempre 2 casas decimais, ponto como separador
+- **Sequência:** sem quebras, 1 a 131 consecutivo
+- **Formatação:** identação consistente com 2 espaços
+
+#### **Geração de Modelo Excel:**
+- **Botão** "Baixar Modelo Excel"
+- **Arquivo .xlsx** com:
+  - Aba "Comandos" com estrutura correta e exemplos
+  - Aba "Instruções" com manual de uso
+  - Formatação de colunas adequada
+- **Diálogo** para escolher local de salvamento
+
+#### **Ações Rápidas:**
+- **Limpar formulário:** resetar todos os campos
+- **Ajuda:** modal com instruções de uso
+- **Últimos processamentos:** histórico na sidebar
+
+#### **Validações Gerais:**
+- **Arquivo selecionado:** obrigatório
+- **Responsável selecionado:** obrigatório  
+- **Nome XML:** obrigatório, extensão .xml
+- **Folha:** obrigatório, formato MMAAAA
+- **Botão conversão:** habilitado apenas quando tudo válido
+
+## 🎨 INTERFACE E EXPERIÊNCIA
+
+### **Design:**
+- **Tema moderno:** cores azul/verde/vermelho para status
+- **Ícones:** Unicode/Emoji para melhor identificação
+- **Tipografia:** fonte system padrão, legível
+- **Layout responsivo:** adaptar a diferentes resoluções
+
+### **Estados Visuais:**
+- **Upload área:** normal/hover/com-arquivo
+- **Botões:** normal/hover/disabled
+- **Campos:** normal/focus/erro
+- **Mensagens:** sucesso (verde)/erro (vermelho)/info (azul)
+
+### **Feedback ao Usuário:**
+- **Barra de progresso** durante conversão
+- **Mensagens específicas** para cada tipo de erro
+- **Contadores:** registros processados/válidos/inválidos
+- **Confirmações:** antes de ações destrutivas
+
+## 🔄 FLUXO DE USO
+
+### **Fluxo Principal:**
+1. **Abrir aplicação**
+2. **Selecionar/cadastrar responsável**
+3. **Carregar arquivo Excel** (drag-drop ou botão)
+4. **Verificar dados** processados (contagem)
+5. **Definir nome XML** e folha
+6. **Converter** (com progresso)
+7. **Salvar XML** no local escolhido
+8. **Confirmar sucesso** com detalhes
+
+### **Fluxos Alternativos:**
+- **Baixar modelo** antes de criar planilha
+- **Gerenciar responsáveis** via modal/sidebar
+- **Ver ajuda** sobre formato dos dados
+- **Corrigir erros** de validação
+
+## ⚠️ TRATAMENTO DE ERROS
+
+### **Validações Obrigatórias:**
+- **Arquivo Excel:** extensão, colunas, dados válidos
+- **Responsável:** CPF, campos obrigatórios
+- **Formulário:** campos preenchidos corretamente
+- **Sistema:** permissões de arquivo, espaço em disco
+
+### **Mensagens de Erro:**
+- **Específicas:** explicar exatamente o problema
+- **Acionáveis:** sugerir como resolver
+- **Contextuais:** mostrar qual campo/linha tem erro
+- **Recuperáveis:** permitir correção sem perder dados
+
+## 💾 PERSISTÊNCIA DE DADOS
+
+### **Arquivo de Configuração (JSON):**
+```json
+{
+  "versao": "2.0",
+  "ultimaAtualizacao": "2025-07-08T10:30:00Z",
+  "responsaveis": [
+    {
+      "id": 1,
+      "nome": "FULANO DE TAL",
+      "cpf": "12345678901",
+      "nip": "12345",
+      "perfil": "AGI",
+      "tipoPerfilOM": "IQM",
+      "codPapem": "094",
+      "ativo": true,
+      "dataCadastro": "2025-01-01T00:00:00Z"
+    }
+  ]
+}
+```
+
+### **Localização:**
+- **Windows:** %APPDATA%/ConversorExcelXML/
+- **Linux:** ~/.config/conversorexcelxml/
+- **macOS:** ~/Library/Application Support/ConversorExcelXML/
+
+## 🚀 CRITÉRIOS DE ACEITAÇÃO
+
+### **Funcionais:**
+- ✅ Ler arquivos Excel reais (.xlsx/.xls)
+- ✅ Validar todos os campos obrigatórios
+- ✅ Gerar XML no formato exato especificado
+- ✅ Gerenciar responsáveis com CRUD completo
+- ✅ Interface intuitiva e responsiva
+- ✅ Funcionar em Windows, Linux e macOS
+
+### **Não-Funcionais:**
+- ✅ Tempo resposta < 5 segundos para arquivos até 1000 registros
+- ✅ Uso de memória < 100MB durante processamento
+- ✅ Interface responsiva (sem travamentos)
+- ✅ Arquivos de até 10MB suportados
+- ✅ Inicialização < 3 segundos
+
+### **Qualidade:**
+- ✅ Zero perda de dados durante conversão
+- ✅ Validação 100% conforme especificação BB
+- ✅ Tratamento de erros robusto
+- ✅ Interface consistente entre plataformas
+- ✅ Backup automático de configurações
+
+## 📁 ENTREGÁVEIS
+
+1. **Aplicação compilada** para Windows, Linux, macOS
+2. **Instaladores nativos** para cada plataforma
+3. **Manual do usuário** em PDF
+4. **Modelo Excel** de exemplo
+5. **Código fonte** documentado
+
+## 🎯 RESULTADO ESPERADO
+
+Sistema desktop nativo, multiplataforma, que substitui soluções legadas .exe, com interface moderna e intuitiva, processamento robusto de dados Excel e geração precisa de XML conforme especificações do Banco do Brasil.
