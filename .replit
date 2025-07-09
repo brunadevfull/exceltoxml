@@ -22,4 +22,4 @@ author = "agent"
 
 [[workflows.workflow.tasks]]
 task = "shell.exec"
-args = "python -m pip install pandas openpyxl tkinter-dnd2 && python main.py"
+args = "python main.py"

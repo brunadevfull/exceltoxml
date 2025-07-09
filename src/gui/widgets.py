@@ -3,8 +3,7 @@ Custom widgets for the Excel to XML converter
 """
 
 import tkinter as tk
-from tkinter import ttk, messagebox
-from tkinter.dnd import DndHandler
+from tkinter import ttk, messagebox, filedialog
 import os
 from pathlib import Path
 
@@ -13,7 +12,7 @@ from utils.validators import validate_cpf
 from utils.constants import PROFILES, PROFILE_TYPES
 
 class FileDropArea(ttk.Frame):
-    """Custom file drop area widget"""
+    """Custom file selection area widget"""
     
     def __init__(self, parent, callback):
         super().__init__(parent)
@@ -21,28 +20,43 @@ class FileDropArea(ttk.Frame):
         self.setup_ui()
         
     def setup_ui(self):
-        """Setup the drop area UI"""
+        """Setup the file selection area UI"""
         self.configure(relief="solid", borderwidth=2)
         
-        # Drop label
-        self.drop_label = ttk.Label(self, 
-                                   text="📁 Arraste um arquivo Excel aqui ou clique para selecionar\n\nFormatos suportados: .xlsx, .xls", 
-                                   anchor="center",
-                                   font=("Arial", 12))
-        self.drop_label.pack(expand=True, fill="both", padx=20, pady=40)
+        # Create a frame for the content
+        content_frame = ttk.Frame(self)
+        content_frame.pack(expand=True, fill="both", padx=20, pady=40)
         
-        # Bind events
+        # File icon and text
+        icon_label = ttk.Label(content_frame, text="📁", font=("Arial", 24))
+        icon_label.pack(pady=(0, 10))
+        
+        # Instructions
+        instruction_label = ttk.Label(content_frame, 
+                                     text="Clique aqui para selecionar um arquivo Excel", 
+                                     font=("Arial", 12, "bold"))
+        instruction_label.pack(pady=(0, 5))
+        
+        # Format info
+        format_label = ttk.Label(content_frame, 
+                                text="Formatos suportados: .xlsx, .xls", 
+                                font=("Arial", 10),
+                                foreground="gray")
+        format_label.pack()
+        
+        # Make the entire area clickable
         self.bind("<Button-1>", self.on_click)
-        self.drop_label.bind("<Button-1>", self.on_click)
+        content_frame.bind("<Button-1>", self.on_click)
+        icon_label.bind("<Button-1>", self.on_click)
+        instruction_label.bind("<Button-1>", self.on_click)
+        format_label.bind("<Button-1>", self.on_click)
         
-        # Configure drag and drop
-        self.drop_target_register(tk.DND_FILES)
-        self.dnd_accept = self.dnd_accept_func
+        # Configure cursor
+        self.configure(cursor="hand2")
+        content_frame.configure(cursor="hand2")
         
     def on_click(self, event):
         """Handle click to select file"""
-        from tkinter import filedialog
-        
         filetypes = [
             ("Excel files", "*.xlsx *.xls"),
             ("All files", "*.*")
@@ -55,33 +69,6 @@ class FileDropArea(ttk.Frame):
         
         if filename:
             self.callback(filename)
-            
-    def dnd_accept_func(self, source, event):
-        """Accept drag and drop files"""
-        return self
-        
-    def dnd_enter(self, source, event):
-        """Handle drag enter"""
-        self.configure(relief="solid", borderwidth=3)
-        
-    def dnd_leave(self, source, event):
-        """Handle drag leave"""
-        self.configure(relief="solid", borderwidth=2)
-        
-    def dnd_commit(self, source, event):
-        """Handle file drop"""
-        try:
-            files = source.data
-            if files:
-                file_path = files[0] if isinstance(files, list) else files
-                if file_path.lower().endswith(('.xlsx', '.xls')):
-                    self.callback(file_path)
-                else:
-                    messagebox.showerror("Erro", "Formato de arquivo não suportado")
-        except Exception as e:
-            messagebox.showerror("Erro", f"Erro ao processar arquivo: {str(e)}")
-            
-        self.configure(relief="solid", borderwidth=2)
 
 
 class ResponsibleDialog:
