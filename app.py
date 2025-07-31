@@ -61,7 +61,7 @@ def upload_file():
         if file.filename == '':
             return jsonify({'error': 'Nenhum arquivo selecionado'}), 400
         
-        if file and allowed_file(file.filename):
+        if file and file.filename and allowed_file(file.filename):
             filename = secure_filename(file.filename)
             filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
             file.save(filepath)
@@ -85,7 +85,10 @@ def upload_file():
 def convert_file():
     """Convert Excel to XML"""
     try:
-        data = request.json
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Dados JSON não fornecidos'}), 400
+            
         filename = data.get('filename')
         responsible_id = data.get('responsible_id')
         output_filename = data.get('output_filename', 'comandos_pagamento.xml')
@@ -149,7 +152,9 @@ def get_responsibles():
 def add_responsible():
     """Add new responsible"""
     try:
-        data = request.json
+        data = request.get_json()
+        if not data:
+            return jsonify({'error': 'Dados JSON não fornecidos'}), 400
         
         # Validate required fields
         required_fields = ['nome', 'cpf', 'nip', 'perfil', 'tipo_perfil_om']

@@ -7,17 +7,19 @@ This is a desktop application for converting Excel spreadsheets to XML files in 
 ## User Preferences
 
 Preferred communication style: Simple, everyday language.
+Platform preference: Desktop application for Ubuntu/Linux testing.
 
 ## System Architecture
 
 ### Frontend Architecture
-- **Framework**: Tkinter (Python's built-in GUI library)
+- **Web Version**: Flask with Bootstrap UI (running on Replit)
+- **Desktop Version**: Tkinter (Python's built-in GUI library) for Ubuntu/Linux
 - **Pattern**: MVC-like structure with separation of concerns
 - **Components**: 
   - Main window with 70% content area and 30% sidebar
-  - Custom widgets for file drag-and-drop functionality
+  - File selection functionality (click-based, drag-and-drop removed for compatibility)
   - Responsive layout with proper grid management
-  - Native desktop feel with platform-specific styling
+  - Native desktop feel with platform-specific styling for Linux
 
 ### Backend Architecture
 - **Language**: Python 3.x
