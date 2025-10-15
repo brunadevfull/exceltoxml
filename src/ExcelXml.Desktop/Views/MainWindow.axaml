@@ -1,0 +1,226 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        x:Class="ExcelXml.Desktop.Views.MainWindow"
+        Title="Excel para XML"
+        Width="1200"
+        Height="800"
+        mc:Ignorable="d">
+  <Window.Resources>
+    <DataTemplate x:Key="ResponsibleTemplate">
+      <StackPanel>
+        <TextBlock Text="{Binding Nome}" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding Cpf}" FontSize="12" Foreground="#6B7280" />
+      </StackPanel>
+    </DataTemplate>
+    <Style Selector="Border.drop-area">
+      <Setter Property="BorderBrush" Value="#D1D5DB" />
+      <Setter Property="Background" Value="#F3F4F6" />
+    </Style>
+    <Style Selector="Border.drop-area.dragover">
+      <Setter Property="BorderBrush" Value="#2563EB" />
+      <Setter Property="Background" Value="#DBEAFE" />
+    </Style>
+  </Window.Resources>
+  <ScrollViewer>
+    <Grid Margin="24" RowDefinitions="Auto,*" RowSpacing="20">
+      <TextBlock Text="Conversor de Comandos de Pagamento"
+                 FontSize="24"
+                 FontWeight="Bold" />
+      <Grid Grid.Row="1"
+            ColumnDefinitions="2*,*"
+            ColumnSpacing="24">
+        <StackPanel Spacing="16">
+          <Border Name="DropBorder"
+                  Padding="24"
+                  Background="#F3F4F6"
+                  BorderBrush="#D1D5DB"
+                  BorderThickness="2"
+                  CornerRadius="12"
+                  Classes="drop-area"
+                  AllowDrop="True"
+                  DragDrop.Drop="OnDrop"
+                  DragDrop.DragOver="OnDragOver"
+                  DragDrop.DragLeave="OnDragLeave">
+            <StackPanel Spacing="12" HorizontalAlignment="Center" VerticalAlignment="Center">
+              <TextBlock Text="Arraste e solte o arquivo Excel aqui"
+                         FontSize="16"
+                         HorizontalAlignment="Center" />
+              <TextBlock Text="ou"
+                         HorizontalAlignment="Center" />
+              <Button Content="Selecionar arquivo"
+                      Width="220"
+                      Command="{Binding SelectFileCommand}" />
+              <TextBlock Text="{Binding SelectedFilePath, TargetNullValue='Nenhum arquivo selecionado'}"
+                         TextWrapping="Wrap"
+                         HorizontalAlignment="Center"
+                         MaxWidth="400" />
+            </StackPanel>
+          </Border>
+
+          <Border Padding="20"
+                  Background="White"
+                  CornerRadius="12"
+                  BorderBrush="#E5E7EB"
+                  BorderThickness="1">
+            <StackPanel Spacing="16">
+              <TextBlock Text="Configuração"
+                         FontSize="18"
+                         FontWeight="SemiBold" />
+              <Grid ColumnDefinitions="Auto,*"
+                    RowDefinitions="Auto,Auto,Auto"
+                    RowSpacing="12"
+                    ColumnSpacing="12">
+                <TextBlock Grid.Row="0"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="Responsável:" />
+                <ComboBox Grid.Row="0"
+                          Grid.Column="1"
+                          Items="{Binding Responsibles}"
+                          SelectedItem="{Binding SelectedResponsible, Mode=TwoWay}"
+                          ItemTemplate="{StaticResource ResponsibleTemplate}" />
+
+                <TextBlock Grid.Row="1"
+                           Grid.Column="0"
+                           VerticalAlignment="Center"
+                           Text="Folha (MMAAAA):" />
+                <TextBox Grid.Row="1"
+                         Grid.Column="1"
+                         Text="{Binding Folha, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         MaxLength="6" />
+
+                <StackPanel Grid.Row="2"
+                            Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="12">
+                  <Button Content="Processar Excel"
+                          Command="{Binding ProcessExcelCommand}" />
+                  <Button Content="Gerar XML"
+                          Command="{Binding GenerateXmlCommand}" />
+                </StackPanel>
+              </Grid>
+            </StackPanel>
+          </Border>
+
+          <Border Padding="20"
+                  Background="#F9FAFB"
+                  CornerRadius="12"
+                  BorderBrush="#E5E7EB"
+                  BorderThickness="1">
+            <StackPanel Spacing="12">
+              <TextBlock Text="Status"
+                         FontSize="18"
+                         FontWeight="SemiBold" />
+              <TextBlock Text="{Binding StatusMessage}"
+                         TextWrapping="Wrap" />
+              <TextBlock Text="{Binding ValidationMessage}"
+                         Foreground="DarkRed"
+                         TextWrapping="Wrap"
+                         IsVisible="{Binding HasValidationMessage}" />
+              <ProgressBar Value="{Binding Progress}"
+                           Maximum="100"
+                           IsVisible="{Binding IsBusy}"
+                           Height="10" />
+            </StackPanel>
+          </Border>
+
+          <Border Padding="20"
+                  Background="White"
+                  CornerRadius="12"
+                  BorderBrush="#E5E7EB"
+                  BorderThickness="1">
+            <StackPanel Spacing="12">
+              <TextBlock Text="Prévia do Excel"
+                         FontSize="18"
+                         FontWeight="SemiBold" />
+              <DataGrid Items="{Binding Records}"
+                        AutoGenerateColumns="False"
+                        HeadersVisibility="All"
+                        IsReadOnly="True"
+                        CanUserAddRows="False"
+                        Height="320">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="#" Binding="{Binding LineNumber}" Width="60" />
+                  <DataGridTextColumn Header="Matrícula" Binding="{Binding Matricula}" Width="120" />
+                  <DataGridTextColumn Header="Rubrica" Binding="{Binding Rubrica}" Width="120" />
+                  <DataGridTextColumn Header="Valor" Binding="{Binding ValorFormatado}" Width="100" />
+                  <DataGridTextColumn Header="Tipo" Binding="{Binding Tipo}" Width="80" />
+                  <DataGridTextColumn Header="Trigrama" Binding="{Binding Trigrama}" Width="100" />
+                  <DataGridCheckBoxColumn Header="Válido" Binding="{Binding IsValid}" Width="80" />
+                  <DataGridTextColumn Header="Erro" Binding="{Binding Error}" Width="*" />
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+
+        <StackPanel Grid.Column="1"
+                    Spacing="16">
+          <Border Padding="20"
+                  Background="White"
+                  CornerRadius="12"
+                  BorderBrush="#E5E7EB"
+                  BorderThickness="1">
+            <StackPanel Spacing="12">
+              <Grid ColumnDefinitions="*,Auto" VerticalAlignment="Center">
+                <TextBlock Grid.Column="0"
+                           Text="Responsáveis"
+                           FontSize="18"
+                           FontWeight="SemiBold"
+                           VerticalAlignment="Center" />
+                <StackPanel Grid.Column="1"
+                            Orientation="Horizontal"
+                            Spacing="8">
+                  <Button Content="Novo"
+                          Click="OnAddResponsible" />
+                  <Button Content="Editar"
+                          Click="OnEditResponsible" />
+                  <Button Content="Remover"
+                          Click="OnRemoveResponsible" />
+                </StackPanel>
+              </Grid>
+              <DataGrid Items="{Binding Responsibles}"
+                        SelectedItem="{Binding SelectedResponsible, Mode=TwoWay}"
+                        AutoGenerateColumns="False"
+                        HeadersVisibility="All"
+                        IsReadOnly="True"
+                        CanUserAddRows="False"
+                        Height="320">
+                <DataGrid.Columns>
+                  <DataGridTextColumn Header="Nome" Binding="{Binding Nome}" Width="*" />
+                  <DataGridTextColumn Header="CPF" Binding="{Binding Cpf}" Width="140" />
+                  <DataGridTextColumn Header="NIP" Binding="{Binding Nip}" Width="100" />
+                  <DataGridTextColumn Header="Perfil" Binding="{Binding Perfil}" Width="120" />
+                  <DataGridTextColumn Header="Tipo" Binding="{Binding TipoPerfilOm}" Width="120" />
+                </DataGrid.Columns>
+              </DataGrid>
+            </StackPanel>
+          </Border>
+
+          <Border Padding="20"
+                  Background="#F9FAFB"
+                  CornerRadius="12"
+                  BorderBrush="#E5E7EB"
+                  BorderThickness="1">
+            <StackPanel Spacing="8">
+              <TextBlock Text="Ajuda"
+                         FontSize="18"
+                         FontWeight="SemiBold" />
+              <TextBlock TextWrapping="Wrap">
+                <Run Text="1. Selecione ou arraste o arquivo Excel (.xlsx ou .xls)." />
+                <LineBreak />
+                <Run Text="2. Revise a prévia dos dados e corrija linhas inválidas." />
+                <LineBreak />
+                <Run Text="3. Escolha o responsável, informe a folha (MMAAAA) e clique em Gerar XML." />
+                <LineBreak />
+                <Run Text="4. O XML será salvo no local escolhido." />
+              </TextBlock>
+            </StackPanel>
+          </Border>
+        </StackPanel>
+      </Grid>
+    </Grid>
+  </ScrollViewer>
+</Window>

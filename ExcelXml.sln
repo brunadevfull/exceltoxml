@@ -8,6 +8,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "tests", "tests", "{10E6A739
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXml.Core.Tests", "tests/ExcelXml.Core.Tests/ExcelXml.Core.Tests.csproj", "{75F6B7D5-49E3-4CF4-8FBD-419A6AE2690C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ExcelXml.Desktop", "src/ExcelXml.Desktop/ExcelXml.Desktop.csproj", "{72C63D51-0CE8-45A2-81A4-6C8E3F39D4A1}"
+EndProject
 Global
     GlobalSection(SolutionConfigurationPlatforms) = preSolution
         Debug|Any CPU = Debug|Any CPU
@@ -22,6 +24,10 @@ Global
         {75F6B7D5-49E3-4CF4-8FBD-419A6AE2690C}.Debug|Any CPU.Build.0 = Debug|Any CPU
         {75F6B7D5-49E3-4CF4-8FBD-419A6AE2690C}.Release|Any CPU.ActiveCfg = Release|Any CPU
         {75F6B7D5-49E3-4CF4-8FBD-419A6AE2690C}.Release|Any CPU.Build.0 = Release|Any CPU
+        {72C63D51-0CE8-45A2-81A4-6C8E3F39D4A1}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+        {72C63D51-0CE8-45A2-81A4-6C8E3F39D4A1}.Debug|Any CPU.Build.0 = Debug|Any CPU
+        {72C63D51-0CE8-45A2-81A4-6C8E3F39D4A1}.Release|Any CPU.ActiveCfg = Release|Any CPU
+        {72C63D51-0CE8-45A2-81A4-6C8E3F39D4A1}.Release|Any CPU.Build.0 = Release|Any CPU
     EndGlobalSection
     GlobalSection(NestedProjects) = preSolution
         {75F6B7D5-49E3-4CF4-8FBD-419A6AE2690C} = {10E6A739-91D3-4BAE-8AB6-0388AAAF5242}
