@@ -2,6 +2,7 @@ using System;
 using System.Linq;
 using Avalonia.Controls;
 using Avalonia.Input;
+using Avalonia.Interactivity;
 using ExcelXml.Core.Models;
 using ExcelXml.Desktop.Services;
 using ExcelXml.Desktop.ViewModels;
